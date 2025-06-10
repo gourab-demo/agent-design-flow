@@ -175,19 +175,6 @@ export const InputComponentCard = () => {
                   />
                 </div>
               </div>
-
-              {/* Preview */}
-              <div className="pt-2 border-t border-gray-100">
-                <Label className="text-xs text-gray-500">Preview</Label>
-                <div className="mt-2">
-                  <Label className="text-sm font-medium text-gray-700">{input.label}</Label>
-                  <Input
-                    placeholder={input.placeholder}
-                    disabled
-                    className="mt-1 bg-gray-50"
-                  />
-                </div>
-              </div>
             </div>
           );
         })}
