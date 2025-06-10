@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Plus, X, FileText, Upload, Link, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,24 +13,34 @@ interface InputComponent {
   type: string;
   enabled: boolean;
   icon: React.ComponentType<any>;
+  label: string;
+  placeholder: string;
 }
 
 const inputTypes = [{
   value: "text",
   label: "Text",
-  icon: FileText
+  icon: FileText,
+  defaultLabel: "Text Input",
+  defaultPlaceholder: "Enter text here..."
 }, {
   value: "file",
   label: "File",
-  icon: Upload
+  icon: Upload,
+  defaultLabel: "File Upload",
+  defaultPlaceholder: "Choose a file"
 }, {
   value: "url",
   label: "URL",
-  icon: Link
+  icon: Link,
+  defaultLabel: "URL Input",
+  defaultPlaceholder: "Enter URL here..."
 }, {
   value: "image",
   label: "Image",
-  icon: Image
+  icon: Image,
+  defaultLabel: "Image Upload",
+  defaultPlaceholder: "Choose an image"
 }];
 
 export const InputComponentCard = () => {
@@ -37,15 +48,20 @@ export const InputComponentCard = () => {
     id: "1",
     type: "text",
     enabled: true,
-    icon: FileText
+    icon: FileText,
+    label: "Text Input",
+    placeholder: "Enter text here..."
   }]);
 
   const addInput = () => {
+    const defaultType = inputTypes[0];
     const newInput: InputComponent = {
       id: Date.now().toString(),
-      type: "text",
+      type: defaultType.value,
       enabled: true,
-      icon: FileText
+      icon: defaultType.icon,
+      label: defaultType.defaultLabel,
+      placeholder: defaultType.defaultPlaceholder
     };
     setInputs([...inputs, newInput]);
   };
@@ -55,10 +71,24 @@ export const InputComponentCard = () => {
   };
 
   const updateInput = (id: string, field: string, value: any) => {
-    setInputs(inputs.map(input => input.id === id ? {
-      ...input,
-      [field]: value
-    } : input));
+    setInputs(inputs.map(input => {
+      if (input.id === id) {
+        let updatedInput = { ...input, [field]: value };
+        
+        // Update icon and defaults when type changes
+        if (field === 'type') {
+          const typeConfig = inputTypes.find(type => type.value === value);
+          if (typeConfig) {
+            updatedInput.icon = typeConfig.icon;
+            updatedInput.label = typeConfig.defaultLabel;
+            updatedInput.placeholder = typeConfig.defaultPlaceholder;
+          }
+        }
+        
+        return updatedInput;
+      }
+      return input;
+    }));
   };
 
   return (
@@ -74,13 +104,14 @@ export const InputComponentCard = () => {
         {inputs.map(input => {
           const IconComponent = inputTypes.find(type => type.value === input.type)?.icon || FileText;
           return (
-            <div key={input.id} className="flex items-center gap-4 p-4 border rounded-lg">
-              <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg">
-                <IconComponent className="h-5 w-5 text-gray-600" />
-              </div>
-              
-              <div className="flex-1 grid grid-cols-2 gap-4">
-                <div>
+            <div key={input.id} className="p-4 border rounded-lg space-y-4">
+              {/* Header Row with Icon, Type, Enabled, and Remove */}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg">
+                  <IconComponent className="h-5 w-5 text-gray-600" />
+                </div>
+                
+                <div className="flex-1">
                   <Label className="text-xs text-gray-500">Type</Label>
                   <Select value={input.type} onValueChange={value => updateInput(input.id, "type", value)}>
                     <SelectTrigger className="mt-1">
@@ -98,8 +129,8 @@ export const InputComponentCard = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
-                <div className="flex items-center justify-between">
+
+                <div className="flex items-center gap-4">
                   <div>
                     <Label className="text-xs text-gray-500">Enabled</Label>
                     <div className="mt-2">
@@ -119,6 +150,42 @@ export const InputComponentCard = () => {
                       <X className="h-4 w-4" />
                     </Button>
                   )}
+                </div>
+              </div>
+
+              {/* Label and Placeholder Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs text-gray-500">Label</Label>
+                  <Input
+                    value={input.label}
+                    onChange={(e) => updateInput(input.id, "label", e.target.value)}
+                    placeholder="Enter label text"
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div>
+                  <Label className="text-xs text-gray-500">Placeholder</Label>
+                  <Input
+                    value={input.placeholder}
+                    onChange={(e) => updateInput(input.id, "placeholder", e.target.value)}
+                    placeholder="Enter placeholder text"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div className="pt-2 border-t border-gray-100">
+                <Label className="text-xs text-gray-500">Preview</Label>
+                <div className="mt-2">
+                  <Label className="text-sm font-medium text-gray-700">{input.label}</Label>
+                  <Input
+                    placeholder={input.placeholder}
+                    disabled
+                    className="mt-1 bg-gray-50"
+                  />
                 </div>
               </div>
             </div>
